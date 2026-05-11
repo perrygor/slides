@@ -185,13 +185,8 @@ html, body {
 
 .title-main.xl {
   font-size: clamp(56px, 8vw, 96px);
-  transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: default;
+  position: relative;
 }
-.title-main.xl:hover {
-  filter: blur(8px);
-}
-
 .slide.active .title-main.xl {
   animation: titleSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -1464,6 +1459,8 @@ document.addEventListener('touchend', function(e) {
   var dx = e.changedTouches[0].clientX - tx;
   if (Math.abs(dx) > 50) go(c + (dx < 0 ? 1 : -1));
 }, { passive: true });
+
+
 
 </script>
 
