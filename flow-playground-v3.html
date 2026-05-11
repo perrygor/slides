@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Flow Blur v3</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#fff; display:flex; justify-content:center; align-items:center; min-height:100vh; overflow:hidden; }
+.title-wrap {
+  position:relative;
+  font-family:'Inter','Noto Sans SC',sans-serif;
+  font-size: clamp(56px, 8vw, 96px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #000;
+  white-space: nowrap;
+}
+.title-slice {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  pointer-events: none;
+  transition: filter 0.12s ease-out;
+}
+.debug {
+  position:fixed; top:20px; left:20px;
+  font:13px/1.6 monospace; color:#999;
+  background:#f5f5f5; padding:12px 16px; border-radius:8px;
+}
+</style>
+</head>
+<body>
+<div class="debug" id="dbg">hover over title ↓</div>
+<div class="title-wrap" id="tw">
+  <div class="title-slice" id="t0">AI 时代产品方法论</div>
+  <div class="title-slice" id="t1">AI 时代产品方法论</div>
+  <div class="title-slice" id="t2">AI 时代产品方法论</div>
+  <div class="title-slice" id="t3">AI 时代产品方法论</div>
+  <div class="title-slice" id="t4">AI 时代产品方法论</div>
+  <div class="title-slice" id="t5">AI 时代产品方法论</div>
+  <div class="title-slice" id="t6">AI 时代产品方法论</div>
+</div>
+<script>
+const tw = document.getElementById('tw');
+const N = 7;
+const slices = [];
+for (let i = 0; i < N; i++) {
+  slices.push(document.getElementById('t' + i));
+}
+
+// Vertical positions: 0% to 100% of text height
+const positions = [];
+for (let i = 0; i < N; i++) {
+  positions.push(i / (N - 1)); // 0, 0.167, 0.333, ..., 1.0
+}
+
+const MAX_BLUR = 14;
+
+tw.addEventListener('mousemove', (e) => {
+  const rect = tw.getBoundingClientRect();
+  const mouseY = e.clientY - rect.top;
+  const textH = rect.height;
+  const mouseNorm = mouseY / textH; // 0-1
+
+  for (let i = 0; i < N; i++) {
+    const sliceNorm = positions[i];
+    const dist = Math.abs(mouseNorm - sliceNorm);
+    // Characters near the mouse → clear (low blur)
+    // Characters far from the mouse → blurry (high blur)
+    const blur = Math.min(MAX_BLUR, dist * MAX_BLUR * 2.5);
+    slices[i].style.filter = 'blur(' + blur.toFixed(1) + 'px)';
+  }
+
+  const dbg = document.getElementById('dbg');
+  dbg.textContent = 'mouse_y_norm=' + mouseNorm.toFixed(2) + ' | slices blurred: ' +
+    slices.map((s, i) => {
+      const d = Math.abs(mouseNorm - positions[i]);
+      return d.toFixed(1);
+    }).join(' ');
+});
+
+tw.addEventListener('mouseleave', () => {
+  slices.forEach(s => s.style.filter = 'none');
+  document.getElementById('dbg').textContent = 'hover over title ↓';
+});
+</script>
+</body>
+</html>
