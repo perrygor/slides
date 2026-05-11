@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Flow Blur Playground</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Inter', 'Noto Sans SC', sans-serif;
+}
+.flow-wrap {
+  font-size: clamp(56px, 8vw, 96px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #000;
+  cursor: default;
+  user-select: none;
+}
+.flow-char {
+  display: inline-block;
+  transition: filter 0.1s ease-out;
+}
+.debug {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font: 13px/1.6 monospace;
+  color: #999;
+  background: #f5f5f5;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+<div class="debug" id="dbg">move mouse over text ↓</div>
+<h1 class="flow-wrap" id="flow">AI 时代产品方法论</h1>
+<script>
+const el = document.getElementById('flow');
+const dbg = document.getElementById('dbg');
+const text = el.textContent;
+el.innerHTML = '';
+const chars = [];
+for (const ch of text) {
+  const span = document.createElement('span');
+  span.className = 'flow-char';
+  span.textContent = ch === ' ' ? '\u00A0' : ch;
+  el.appendChild(span);
+  chars.push(span);
+}
+console.log('chars created:', chars.length);
+const MAX_BLUR = 16;
+const RADIUS = 400;
+el.addEventListener('mousemove', (e) => {
+  const mx = e.clientX, my = e.clientY;
+  for (let i = 0; i < chars.length; i++) {
+    const r = chars[i].getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const d = Math.sqrt((mx-cx)**2 + (my-cy)**2);
+    const b = Math.min(MAX_BLUR, Math.max(0, (d/RADIUS)*MAX_BLUR));
+    chars[i].style.filter = b < 0.5 ? 'none' : 'blur('+b.toFixed(1)+'px)';
+  }
+  const r0 = chars[0].getBoundingClientRect();
+  dbg.textContent = 'mouse: '+mx+', '+my+' | char0: x='+Math.round(r0.left)+' y='+Math.round(r0.top)+' w='+Math.round(r0.width);
+});
+el.addEventListener('mouseleave', () => {
+  chars.forEach(s => s.style.filter = 'none');
+  dbg.textContent = 'mouse left — all clear';
+});
+</script>
+</body>
+</html>
